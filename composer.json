@@ -1,0 +1,28 @@
+{
+  "name": "bapcat/tailor",
+  "description": "",
+  "license": "GPLv3",
+  "homepage": "http://github.com/BapCat/Tailor",
+  "keywords": [],
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "Corey Frenette",
+      "email": "corey@narwhunderful.com"
+    }
+  ],
+  "require": {
+    "php": ">=5.5.0",
+    "illuminate/view": "^5.2@dev",
+    "bapcat/persist": "dev-master",
+    "bapcat/interfaces": "dev-master"
+  },
+  "require-dev": {
+    "satooshi/php-coveralls": "dev-master"
+  },
+  "autoload": {
+    "psr-4": {
+      "BapCat\\Tailor\\": "src/"
+    }
+  }
+}
