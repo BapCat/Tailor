@@ -16,16 +16,22 @@ class Tailor {
   }
   
   public function bind($alias, $template, array $params) {
-    $this->bindings[$alias] = [$template, $params];
+    $this->bindings[$alias] = [
+      $template,
+      $params,
+      $this->makeTemplateHash($template, $params)
+    ];
+  }
+  
+  private function makeTemplateHash($template, $params) {
+    return sha1($template . json_encode($params) . $this->finder->getTemplateModified($template));
   }
   
   private function make($alias) {
-    list($template, $params) = array_key_exists($alias, $this->bindings) ? $this->bindings[$alias] : [];
+    list($template, $params, $hash) = array_key_exists($alias, $this->bindings) ? $this->bindings[$alias] : [];
     
-    $hash = sha1(json_encode($params));
-    
-    if($this->finder->hasCompiled($alias, $hash)) {
-      $this->finder->includeCompiled($alias, $hash);
+    if($this->finder->hasCompiled($hash)) {
+      $this->finder->includeCompiled($hash);
       return;
     }
     
@@ -36,7 +42,7 @@ class Tailor {
     $path = $this->finder->getTemplate($template);
     $compiled = $this->compiler->compile($path, $params);
     
-    $this->finder->cacheCompiled($alias, $hash, $compiled);
-    $this->finder->includeCompiled($alias, $hash);
+    $this->finder->cacheCompiled($hash, $compiled);
+    $this->finder->includeCompiled($hash);
   }
 }

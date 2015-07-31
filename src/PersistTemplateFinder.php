@@ -15,16 +15,16 @@ class PersistTemplateFinder implements TemplateFinder {
     return str_replace('\\', '.', $alias);
   }
   
-  public function hasCompiled($alias, $hash) {
-    return $this->compiled->child[$this->aliasToFile($alias) . ".$hash.php"]->exists;
+  public function hasCompiled($hash) {
+    return $this->compiled->child["$hash.php"]->exists;
   }
   
-  public function includeCompiled($alias, $hash) {
-    include $this->compiled->driver->getRoot() . '/' . $this->compiled->path . '/' . $this->aliasToFile($alias) . ".$hash.php";
+  public function includeCompiled($hash) {
+    include $this->compiled->driver->getRoot() . '/' . $this->compiled->path . "/$hash.php";
   }
   
-  public function cacheCompiled($alias, $hash, $compiled) {
-    $file = $this->compiled->child[$this->aliasToFile($alias) . ".$hash.php"];
+  public function cacheCompiled($hash, $compiled) {
+    $file = $this->compiled->child["$hash.php"];
     
     //@TODO
     $fn = $file->driver->getRoot() . '/' . $file->path;
@@ -40,5 +40,9 @@ class PersistTemplateFinder implements TemplateFinder {
     
     //@TODO
     return $file->driver->getRoot() . "/{$file->path}";
+  }
+  
+  public function getTemplateModified($class) {
+    return filemtime($this->getTemplate($class));
   }
 }
