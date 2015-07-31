@@ -11,16 +11,20 @@ class PersistTemplateFinder implements TemplateFinder {
     $this->compiled  = $compiled;
   }
   
-  public function hasCompiled($class) {
-    return $this->compiled->child["$class.php"]->exists;
+  private function aliasToFile($alias) {
+    return str_replace('\\', '.', $alias);
   }
   
-  public function includeCompiled($class) {
-    include $this->compiled->driver->getRoot() . '/' . $this->compiled->path . "/$class.php";
+  public function hasCompiled($alias, $hash) {
+    return $this->compiled->child[$this->aliasToFile($alias) . ".$hash.php"]->exists;
   }
   
-  public function cacheCompiled($class, $compiled) {
-    $file = $this->compiled->child["$class.php"];
+  public function includeCompiled($alias, $hash) {
+    include $this->compiled->driver->getRoot() . '/' . $this->compiled->path . '/' . $this->aliasToFile($alias) . ".$hash.php";
+  }
+  
+  public function cacheCompiled($alias, $hash, $compiled) {
+    $file = $this->compiled->child[$this->aliasToFile($alias) . ".$hash.php"];
     
     //@TODO
     $fn = $file->driver->getRoot() . '/' . $file->path;

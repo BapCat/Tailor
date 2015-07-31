@@ -15,26 +15,28 @@ class Tailor {
     spl_autoload_register([$this, 'make']);
   }
   
-  public function bind($class, array $config) {
-    $this->bindings[$class] = $config;
+  public function bind($alias, $template, array $params) {
+    $this->bindings[$alias] = [$template, $params];
   }
   
-  private function make($class) {
-    if($this->finder->hasCompiled($class)) {
-      $this->finder->includeCompiled($class);
+  private function make($alias) {
+    list($template, $params) = array_key_exists($alias, $this->bindings) ? $this->bindings[$alias] : [];
+    
+    $hash = sha1(json_encode($params));
+    
+    if($this->finder->hasCompiled($alias, $hash)) {
+      $this->finder->includeCompiled($alias, $hash);
       return;
     }
     
-    if(!$this->finder->hasTemplate($class)) {
+    if(!$this->finder->hasTemplate($template)) {
       return;
     }
     
-    $data = array_key_exists($class, $this->bindings) ? $this->bindings[$class] : [];
+    $path = $this->finder->getTemplate($template);
+    $compiled = $this->compiler->compile($path, $params);
     
-    $path = $this->finder->getTemplate($class);
-    $compiled = $this->compiler->compile($path, $data);
-    
-    $this->finder->cacheCompiled($class, $compiled);
-    $this->finder->includeCompiled($class);
+    $this->finder->cacheCompiled($alias, $hash, $compiled);
+    $this->finder->includeCompiled($alias, $hash);
   }
 }

@@ -23,5 +23,11 @@ $compiler = new PhpCompiler();
 // Create an instance of Tailor to actually do the autoloading
 $tailor = new Tailor($finder, $compiler);
 
-$test = new ASDD;
-var_dump($test);
+use NS1\ASDD as A1;
+use NS2\ASDD as A2;
+
+$tailor->bind(A1::class, 'ASDD', ['namespace' => 'NS1']);
+$tailor->bind(A2::class, 'ASDD', ['namespace' => 'NS2']);
+
+var_dump(new A1());
+var_dump(new A2());

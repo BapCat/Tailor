@@ -13,7 +13,6 @@
   ],
   "require": {
     "php": ">=5.5.0",
-    "illuminate/view": "^5.2@dev",
     "bapcat/persist": "dev-master",
     "bapcat/interfaces": "dev-master"
   },
