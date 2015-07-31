@@ -1,38 +1,40 @@
 <?php namespace BapCat\Tailor;
 
-use BapCat\Interfaces\Persist\Directory;
-use BapCat\Interfaces\Persist\File;
-
-use Illuminate\View\Compilers\BladeCompiler;
+use BapCat\Tailor\Compilers\Compiler;
 
 class Tailor {
-  private $blade;
+  private $finder;
+  private $compiler;
   
-  private $templates;
-  private $compiled;
+  private $bindings = [];
   
-  public function __construct(BladeCompiler $blade, Directory $templates, Directory $compiled) {
-    $this->blade = $blade;
-    
-    $this->templates = $templates;
-    $this->compiled  = $compiled;
+  public function __construct(TemplateFinder $finder, Compiler $compiler) {
+    $this->finder   = $finder;
+    $this->compiler = $compiler;
     
     spl_autoload_register([$this, 'make']);
   }
   
   public function bind($class, array $config) {
-    
+    $this->bindings[$class] = $config;
   }
   
   private function make($class) {
-    $file = $this->templates->child["$class.blade.php"];
-    
-    if($file->exists) {
-      //@TODO
-      $fn = $file->driver->getRoot() . '/' . $file->path;
-      $content = file_get_contents($fn);
-      
-      var_dump($this->blade->compileString($content));
+    if($this->finder->hasCompiled($class)) {
+      $this->finder->includeCompiled($class);
+      return;
     }
+    
+    if(!$this->finder->hasTemplate($class)) {
+      return;
+    }
+    
+    $data = array_key_exists($class, $this->bindings) ? $this->bindings[$class] : [];
+    
+    $path = $this->finder->getTemplate($class);
+    $compiled = $this->compiler->compile($path, $data);
+    
+    $this->finder->cacheCompiled($class, $compiled);
+    $this->finder->includeCompiled($class);
   }
 }
