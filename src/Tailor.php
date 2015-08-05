@@ -28,7 +28,11 @@ class Tailor {
   }
   
   private function make($alias) {
-    list($template, $params, $hash) = array_key_exists($alias, $this->bindings) ? $this->bindings[$alias] : [];
+    if(!array_key_exists($alias, $this->bindings)) {
+      return;
+    }
+    
+    list($template, $params, $hash) = $this->bindings[$alias];
     
     if($this->finder->hasCompiled($hash)) {
       $this->finder->includeCompiled($hash);
