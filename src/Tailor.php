@@ -15,7 +15,12 @@ class Tailor {
     spl_autoload_register([$this, 'make']);
   }
   
-  public function bind($alias, $template, array $params) {
+  public function bind($alias, $template, array $params = []) {
+    if(!$this->finder->hasTemplate($template)) {
+      //@TODO: proper exception
+      throw new Exception("Template $template doesn't exist!");
+    }
+    
     $this->bindings[$alias] = [
       $template,
       $params,
@@ -36,10 +41,6 @@ class Tailor {
     
     if($this->finder->hasCompiled($hash)) {
       $this->finder->includeCompiled($hash);
-      return;
-    }
-    
-    if(!$this->finder->hasTemplate($template)) {
       return;
     }
     
