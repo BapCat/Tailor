@@ -16,9 +16,6 @@
     "bapcat/persist": "dev-master",
     "bapcat/interfaces": "dev-master"
   },
-  "require-dev": {
-    "satooshi/php-coveralls": "dev-master"
-  },
   "autoload": {
     "psr-4": {
       "BapCat\\Tailor\\": "src/"
