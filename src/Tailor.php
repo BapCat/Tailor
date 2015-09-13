@@ -18,7 +18,7 @@ class Tailor {
   public function bind($alias, $template, array $params = []) {
     if(!$this->finder->hasTemplate($template)) {
       //@TODO: proper exception
-      throw new Exception("Template $template doesn't exist!");
+      throw new \Exception("Template $template doesn't exist!");
     }
     
     $this->bindings[$alias] = [
