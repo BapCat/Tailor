@@ -14,7 +14,8 @@
   "require": {
     "php": ">=5.5.0",
     "bapcat/persist": "dev-master",
-    "bapcat/interfaces": "dev-master"
+    "bapcat/interfaces": "dev-master as 1.1",
+    "bapcat/values": "^0.1.1"
   },
   "autoload": {
     "psr-4": {

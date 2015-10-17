@@ -23,7 +23,9 @@ class PersistTemplateFinder implements TemplateFinder {
     $file = $this->compiled->child["$hash.php"];
     
     //@TODO
-    return file_put_contents($file->full_path, $compiled);
+    file_put_contents($file->full_path, $compiled);
+    
+    return $file->full_path;
   }
   
   public function hasTemplate($class) {

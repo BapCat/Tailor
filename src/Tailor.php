@@ -1,16 +1,19 @@
 <?php namespace BapCat\Tailor;
 
 use BapCat\Tailor\Compilers\Compiler;
+use BapCat\Tailor\Compilers\Preprocessor;
 
 class Tailor {
   private $finder;
+  private $preprocessor;
   private $compiler;
   
   private $bindings = [];
   
-  public function __construct(TemplateFinder $finder, Compiler $compiler) {
-    $this->finder   = $finder;
-    $this->compiler = $compiler;
+  public function __construct(TemplateFinder $finder, Preprocessor $preprocessor, Compiler $compiler) {
+    $this->finder       = $finder;
+    $this->preprocessor = $preprocessor;
+    $this->compiler     = $compiler;
     
     spl_autoload_register([$this, 'make']);
   }
@@ -45,7 +48,8 @@ class Tailor {
     }
     
     $path = $this->finder->getTemplate($template);
-    $compiled = $this->compiler->compile($path, $params);
+    $new_path = $this->preprocessor->process($path, $this->finder);
+    $compiled = $this->compiler->compile($new_path, $params);
     
     $this->finder->cacheCompiled($hash, $compiled);
     $this->finder->includeCompiled($hash);
