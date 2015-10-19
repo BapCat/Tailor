@@ -29,7 +29,7 @@ class NomPreprocessor implements Preprocessor {
         '}'
       ], [
         new Regex('/@(titleize|camelize|underscore|pluralize|singularize|humanize|ordinal|ordinalize)\s*\(\s*(.+)\s*\)/'),
-        '"\\\'" . \\\\ICanBoogie\\\\Inflector::get()->$1($2) . "\\\'"'
+        '\\\\ICanBoogie\\\\Inflector::get()->$1($2)'
       ], [
         new Regex('/{{\s*(.+?)\s*}}/'),
         '<?= htmlentities($1) ?>'
