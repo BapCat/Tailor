@@ -1,6 +1,6 @@
 <?php namespace BapCat\Tailor;
 
-use BapCat\Interfaces\Persist\Directory;
+use BapCat\Persist\Directory;
 
 class PersistTemplateFinder implements TemplateFinder {
   private $templates;
