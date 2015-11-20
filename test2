@@ -4,27 +4,27 @@
 
 require __DIR__ . '/vendor/autoload.php';
 
-use BapCat\Persist\Drivers\Filesystem\FilesystemDriver;
+use BapCat\Hashing\Algorithms\Sha1WeakHasher;
+use BapCat\Nom\Compiler;
+use BapCat\Nom\NullPreprocessor;
+use BapCat\Persist\Drivers\Local\LocalDriver;
 use BapCat\Tailor\Tailor;
-use BapCat\Tailor\PersistTemplateFinder;
-use BapCat\Tailor\Compilers\Compiler;
-use BapCat\Tailor\Compilers\NullPreprocessor;
 
 // Grab filesystem directories
-$persist = new FilesystemDriver(__DIR__ . '/storage');
-$templates = $persist->get('templates');
-$compiled  = $persist->get('compiled');
+$persist = new LocalDriver(__DIR__ . '/storage');
+$templates = $persist->getDirectory('templates');
+$compiled  = $persist->getDirectory('compiled');
 
-// TemplateFinders are able to find and use raw/compiled templates
-$finder = new PersistTemplateFinder($templates, $compiled);
-
+// Preprocessors compile higher-level templates (like Nom) to PHP templates
 $preprocessor = new NullPreprocessor();
 
-// Compilers translate raw templates into compiled ones
+// Compilers translate PHP templates into actual PHP code
 $compiler = new Compiler();
 
+$hasher = new Sha1WeakHasher();
+
 // Create an instance of Tailor to actually do the autoloading
-$tailor = new Tailor($finder, $preprocessor, $compiler);
+$tailor = new Tailor($templates, $compiled, $preprocessor, $compiler, $hasher);
 
 use NS1\ASDD as A1;
 use NS2\ASDD as A2;

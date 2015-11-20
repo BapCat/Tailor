@@ -1,27 +1,37 @@
 <?php namespace BapCat\Tailor;
 
-use BapCat\Tailor\Compilers\Compiler;
-use BapCat\Tailor\Compilers\Preprocessor;
+use BapCat\Hashing\Hasher;
+use BapCat\Nom\Compiler;
+use BapCat\Nom\Preprocessor;
+use BapCat\Persist\Directory;
+use BapCat\Persist\File;
+use BapCat\Persist\FileReader;
 
 class Tailor {
-  private $finder;
+  private $templates;
+  private $compiled;
   private $preprocessor;
   private $compiler;
+  private $hasher;
   
   private $bindings = [];
   
-  public function __construct(TemplateFinder $finder, Preprocessor $preprocessor, Compiler $compiler) {
-    $this->finder       = $finder;
+  public function __construct(Directory $templates, Directory $compiled, Preprocessor $preprocessor, Compiler $compiler, Hasher $hasher) {
+    $this->templates    = $templates;
+    $this->compiled     = $compiled;
     $this->preprocessor = $preprocessor;
     $this->compiler     = $compiler;
+    $this->hasher       = $hasher;
     
     spl_autoload_register([$this, 'make']);
   }
   
   public function bind($alias, $template, array $params = []) {
-    if(!$this->finder->hasTemplate($template)) {
+    $template = $this->templates->child["$template.php"];
+    
+    if(!$template->exists) {
       //@TODO: proper exception
-      throw new \Exception("Template $template doesn't exist!");
+      throw new \Exception("Template [{$template->path}] doesn't exist!");
     }
     
     $this->bindings[$alias] = [
@@ -31,8 +41,8 @@ class Tailor {
     ];
   }
   
-  private function makeTemplateHash($template, $params) {
-    return sha1($template . json_encode($params) . $this->finder->getTemplateModified($template));
+  private function makeTemplateHash(File $template, array $params) {
+    return $this->hasher->make($template->path . json_encode($params) . $template->modified);
   }
   
   private function make($alias) {
@@ -42,16 +52,29 @@ class Tailor {
     
     list($template, $params, $hash) = $this->bindings[$alias];
     
-    if($this->finder->hasCompiled($hash)) {
-      $this->finder->includeCompiled($hash);
-      return;
+    $compiled_file = $this->compiled->child["$hash.php"];
+    
+    if(!$compiled_file->exists) {
+      $code = null;
+      $template->read(function(FileReader $reader) use(&$code) {
+        $code = $reader->read();
+      });
+      
+      $processed_code = $this->preprocessor->process($code);
+      $processed_file = $this->compiled->child["$hash.php"];
+      
+      //@TODO: use FileWriter when available
+      file_put_contents($processed_file->full_path, $processed_code);
+      
+      //@TODO: this won't work unless it's a LocalFile
+      $compiled_code = $this->compiler->compile($processed_file, $params);
+      $compiled_file = $this->compiled->child["$hash.php"];
+      file_put_contents($compiled_file->full_path, $compiled_code);
     }
     
-    $path = $this->finder->getTemplate($template);
-    $new_path = $this->preprocessor->process($path, $this->finder);
-    $compiled = $this->compiler->compile($new_path, $params);
-    
-    $this->finder->cacheCompiled($hash, $compiled);
-    $this->finder->includeCompiled($hash);
+    if((include $compiled_file->makeLocal()->full_path) == false) {
+      //@TODO
+      throw new \Exception("Could not include [{$compiled_file->path}]");
+    }
   }
 }
