@@ -10,20 +10,23 @@ use BapCat\Persist\FileReader;
 class Tailor {
   private $templates;
   private $compiled;
-  private $preprocessor;
+  private $preprocessors = [];
   private $compiler;
   private $hasher;
   
   private $bindings = [];
   
-  public function __construct(Directory $templates, Directory $compiled, Preprocessor $preprocessor, Compiler $compiler, Hasher $hasher) {
+  public function __construct(Directory $templates, Directory $compiled, Compiler $compiler, Hasher $hasher) {
     $this->templates    = $templates;
     $this->compiled     = $compiled;
-    $this->preprocessor = $preprocessor;
     $this->compiler     = $compiler;
     $this->hasher       = $hasher;
     
     spl_autoload_register([$this, 'make']);
+  }
+  
+  public function addPreprocessor(Preprocessor $preprocessor) {
+    $this->preprocessors[] = $preprocessor;
   }
   
   public function bind($alias, $template, array $params = []) {
@@ -60,7 +63,12 @@ class Tailor {
         $code = $reader->read();
       });
       
-      $processed_code = $this->preprocessor->process($code);
+      $processed_code = $code;
+      
+      foreach($this->preprocessors as $preprocessor) {
+        $processed_code = $preprocessor->process($processed_code);
+      }
+      
       $processed_file = $this->compiled->child["$hash.php"];
       
       //@TODO: use FileWriter when available
