@@ -33,7 +33,7 @@ class Generator {
     return $compiled_file;
   }
   
-  public function include(File $compiled) {
+  public function includeFile(File $compiled) {
     if((include $compiled->makeLocal()->full_path) == false) {
       //@TODO
       throw new \Exception("Could not include [{$compiled->path}]");

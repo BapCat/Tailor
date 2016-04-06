@@ -17,7 +17,7 @@ class Tailor {
   public function bind($alias, $template, array $params = []) {
     $this->bindCallback($alias, function(Generator $generator) use($template, $params) {
       $compiled = $generator->generate($template, $params);
-      $generator->include($compiled);
+      $generator->includeFile($compiled);
     });
   }
   
