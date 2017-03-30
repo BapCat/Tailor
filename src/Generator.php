@@ -1,6 +1,6 @@
 <?php namespace BapCat\Tailor;
 
-use BapCat\Hashing\Hasher;
+use BapCat\Hashing\Algorithms\Sha1WeakHasher;
 use BapCat\Nom\Pipeline;
 use BapCat\Persist\Directory;
 use BapCat\Persist\File;
@@ -11,11 +11,11 @@ class Generator {
   private $pipeline;
   private $hasher;
   
-  public function __construct(Directory $templates, Directory $cache, Pipeline $pipeline, Hasher $hasher) {
+  public function __construct(Directory $templates, Directory $cache, Pipeline $pipeline, HashGenerationStrategy $hasher = null) {
     $this->templates = $templates;
     $this->cache     = $cache;
     $this->pipeline  = $pipeline;
-    $this->hasher    = $hasher;
+    $this->hasher    = $hasher ?: new DefaultHashGenerator(new Sha1WeakHasher());
   }
   
   public function generate($template, array $params = []) {
@@ -41,6 +41,6 @@ class Generator {
   }
   
   private function makeTemplateHash(File $template, array $params) {
-    return $template->name . '.' . $this->hasher->make($template->path . json_encode($params) . $template->modified);
+    return $template->name . '.' . $this->hasher->generateHash($template, $params);
   }
 }

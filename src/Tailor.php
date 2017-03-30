@@ -8,7 +8,7 @@ class Tailor {
   private $generator;
   private $bindings = [];
   
-  public function __construct(Directory $templates, Directory $cache, Pipeline $pipeline, Hasher $hasher) {
+  public function __construct(Directory $templates, Directory $cache, Pipeline $pipeline, HashGenerationStrategy $hasher = null) {
     $this->generator = new Generator($templates, $cache, $pipeline, $hasher);
     
     spl_autoload_register([$this, 'make']);
