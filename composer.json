@@ -1,5 +1,6 @@
 {
   "name" : "bapcat/tailor",
+  "description" : "Dynamic code generator",
   "license" : "GPL-3.0-or-later",
   "homepage" : "https://github.com/BapCat/Tailor",
   "authors" : [{
